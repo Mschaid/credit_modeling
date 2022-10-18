@@ -4,16 +4,41 @@ import re
 
 
 class DataProcessor():
+    """ 
+    Data processing class for loading, cleaning and extracting features
+    Class is initialied with the path to the data:str , and a target: str
 
-    def __init__(self, path, target):
+    """
+
+    def __init__(self, path: str, target: str):
         self.path = path
         self.target = target
 
     def load_data(self):
-        self.data = pd.read_csv(self.path)
+        """ 
+        ## Summary
+        imports data from self.path csv file and stores as self.data, low memory is set to false due to coloumns containing
+        multiple data types
+
+        ### Returns: 
+        Stores self and stores dataframe as self.data attribute
+
+
+        """
+
+        self.data = pd.read_csv(self.path, low_memory=False)
         return self
 
     def clean_data(self):
+        """
+        ### Summary: 
+
+        Cleans and prepares data. Intatiates as self.clean_data 
+
+        #### Returns:
+           self
+        """
+
         df = self.data
 
         def find_cols_with_missing_data(_df, threshold):
@@ -69,10 +94,42 @@ class DataProcessor():
         )
         return self
 
-    def processes_dummies(self, cols):
-    dummy_df = pd.get_dummies(self.clean_data[cols])
-    self.processed_data = (
-        pd.concat([self.clean_data, dummy_df], axis=1)
-        .drop(columns=cols)
-    )
-    return self
+    def processes_dummies(self, cols=None):
+        """ 
+        ## Summary: 
+        generates dummies from categorical data types in self.clean_data and concatenates with original dataframe
+        (self.clean_data). Drops cols from dataframe. 
+
+        The cols parameter is optional. Function checks that no input was given, if ==None, then extracts all categorical features. If cols list is given, then that list is used instead
+
+        ### Returns:
+        self, and instantiates self.processed_data
+
+
+        """
+        if cols == None:
+            cols = self.clean_data.select_dtypes('category').columns
+        else:
+            cols = cols
+
+        dummy_df = pd.get_dummies(self.clean_data[cols])
+        self.processed_data = (
+            pd.concat([self.clean_data, dummy_df], axis=1)
+            .drop(columns=cols)
+        )
+        return self
+
+    def extract_feature_names(self):
+        """
+        ### Summary
+        extracts feature names from self.processed_data
+        Instatiates self.features
+
+
+        #### Returns:
+            _self
+        """
+
+        self.features = (self.processed_data
+                         .drop(columns=self.target).columns)
+        return self
