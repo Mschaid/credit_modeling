@@ -119,7 +119,7 @@ class DataProcessor():
         )
         return self
 
-    def extract_feature_names(self):
+    def extract_features_and_target(self):
         """
         ### Summary
         extracts feature names from self.processed_data
@@ -127,9 +127,12 @@ class DataProcessor():
 
 
         #### Returns:
-            _self
+            self
         """
 
-        self.features = (self.processed_data
-                         .drop(columns=self.target).columns)
+        self.feature_names = (self.processed_data
+                              .drop(columns=self.target).columns)
+
+        self.feature_data = self.processed_data[self.feature_names]
+        self.target_data = self.processed_data[self.target]
         return self
